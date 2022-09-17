@@ -1,0 +1,115 @@
+#include<iostream>  
+using namespace std;
+
+struct Node {  
+    int data;  
+    Node *prev;  
+    Node *next;  
+};  
+Node* newelem(int item)  
+{  
+    Node* node = new Node;  
+    node->data = item;  
+    node->prev = node->next = NULL;  
+    return node;  
+}  
+/*Inorder traversal of the tree formed*/  
+void inorder(Node *root)  
+{  
+    if (root == NULL)  
+        return;  
+    inorder(root->prev); //traverse prev subtree  
+    cout<< root->data << "   "; //traverse root node  
+    inorder(root->next); //traverse next subtree  
+}  
+Node* findMinimum(Node* cur) /*To find the inorder successor*/  
+{  
+    while(cur->prev != NULL) {  
+        cur = cur->prev;  
+    }  
+    return cur;  
+}  
+Node* insert(Node* root, int item) /*Insert a node*/  
+{  
+    if (root == NULL)  
+        return newelem(item); /*return new node if tree is empty*/  
+    if (item < root->data)  
+        root->prev = insert(root->prev, item);  
+    else  
+        root->next = insert(root->next, item);  
+    return root;  
+}  
+void search(Node* &cur, int item, Node* &parent)  
+{  
+    while (cur != NULL && cur->data != item)  
+    {  
+        parent = cur;  
+        if (item < cur->data)  
+            cur = cur->prev;  
+        else  
+            cur = cur->next;  
+    }  
+}  
+void deletion(Node*& root, int item) /*function to delete a node*/  
+{  
+    Node* parent = NULL;  
+    Node* cur = root;  
+    search(cur, item, parent); /*find the node to be deleted*/  
+    if (cur == NULL)  
+        return;  
+    if (cur->prev == NULL && cur->next == NULL) /*When node has no children*/  
+    {  
+        if (cur != root)  
+        {  
+            if (parent->prev == cur)  
+                parent->prev = NULL;  
+            else  
+                parent->next = NULL;  
+        }  
+        else  
+            root = NULL;  
+        free(cur);       
+    }  
+    else if (cur->prev && cur->next)  
+    {  
+        Node* succ  = findMinimum(cur->next);  
+        int val = succ->data;  
+        deletion(root, succ->data);  
+        cur->data = val;  
+    }  
+    else  
+    {  
+        Node* child = (cur->prev)? cur->prev: cur->next;  
+        if (cur != root)  
+        {  
+            if (cur == parent->prev)  
+                parent->prev = child;  
+            else  
+                parent->next = child;  
+        }  
+        else  
+            root = child;  
+        free(cur);  
+    }  
+}  
+int main()  
+{  
+  Node* root = NULL;  
+  root = insert(root, 45);  
+  root = insert(root, 30);  
+  root = insert(root, 50);  
+  root = insert(root, 25);  
+  root = insert(root, 35);  
+  root = insert(root, 45);  
+  root = insert(root, 60);  
+  root = insert(root, 4);  
+  printf("The inorder traversal of the given binary tree is - \n");  
+  inorder(root);  
+  deletion(root, 25);  
+  printf("\nAfter deleting node 25, the inorder traversal of the given binary tree is - \n");  
+  inorder(root);   
+  insert(root, 2);  
+  printf("\nAfter inserting node 2, the inorder traversal of the given binary tree is - \n");  
+  inorder(root);  
+  return 0;  
+}  
